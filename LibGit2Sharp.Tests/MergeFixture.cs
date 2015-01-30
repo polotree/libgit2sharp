@@ -749,6 +749,52 @@ namespace LibGit2Sharp.Tests
             }
         }
 
+        [Fact]
+        public void TestMergeIntoSelfHasNoConflicts()
+        {
+            string path = SandboxMergeTestRepo();
+            using (var repo = new Repository(path))
+            {
+                var master = repo.Lookup<Commit>("master");
+
+                var result = repo.MergeHasConflicts(master.Tree, master.Tree, null);
+
+                Assert.False(result);
+            }
+        }
+
+        [Fact]
+        public void TestMergeIntoOtherBranchHasNoConflicts()
+        {
+            string path = SandboxMergeTestRepo();
+            using (var repo = new Repository(path))
+            {
+                var master = repo.Lookup<Commit>("master");
+                var branch = repo.Lookup<Commit>("fast_forward");
+                var ancestorCommit = repo.Commits.FindMergeBase(master, branch);
+
+                var result = repo.MergeHasConflicts(master.Tree, branch.Tree, ancestorCommit.Tree);
+
+                Assert.False(result);
+            }
+        }
+
+        [Fact]
+        public void TestMergeIntoWrongBranchHasConflicts()
+        {
+            string path = SandboxMergeTestRepo();
+            using (var repo = new Repository(path))
+            {
+                var master = repo.Lookup<Commit>("master");
+                var branch = repo.Lookup<Commit>("conflicts");
+                var ancestorCommit = repo.Commits.FindMergeBase(master, branch);
+
+                var result = repo.MergeHasConflicts(master.Tree, branch.Tree, ancestorCommit.Tree);
+
+                Assert.True(result);
+            }
+        }
+
         private Commit AddFileCommitToRepo(IRepository repository, string filename, string content = null)
         {
             Touch(repository.Info.WorkingDirectory, filename, content);
