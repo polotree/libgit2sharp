@@ -408,18 +408,18 @@ namespace LibGit2Sharp
         }
 
         /// <summary>
-        /// Returns whether merging <paramref name="ours"/> into <paramref name="theirs"/>
+        /// Returns whether merging <paramref name="one"/> into <paramref name="another"/>
         /// would result in merge conflicts.
         /// </summary>
-        /// <param name="ours">The base tree to merge into.</param>
-        /// <param name="theirs">The tree to merge into <paramref name="ours"/>.</param>
+        /// <param name="one">The commit wrapping the base tree to merge into.</param>
+        /// <param name="another">The commit wrapping tree to merge into <paramref name="one"/>.</param>
         /// <returns>True if the merge does not result in a conflict, false otherwise.</returns>
-        public virtual bool CanMergeWithoutConflict(Commit ours, Commit theirs)
+        public virtual bool CanMergeWithoutConflict(Commit one, Commit another)
         {
-            using (var ourHandle = Proxy.git_object_peel(repo.Handle, ours.Id, GitObjectType.Tree, true))
-            using (var theirHandle = Proxy.git_object_peel(repo.Handle, theirs.Id, GitObjectType.Tree, true))
+            using (var ourHandle = Proxy.git_object_peel(repo.Handle, one.Id, GitObjectType.Tree, true))
+            using (var theirHandle = Proxy.git_object_peel(repo.Handle, another.Id, GitObjectType.Tree, true))
             {
-                var ancestorCommit = repo.Commits.FindMergeBase(ours, theirs);
+                var ancestorCommit = repo.Commits.FindMergeBase(one, another);
 
                 var ancestorHandle = ancestorCommit != null
                     ? Proxy.git_object_peel(repo.Handle, ancestorCommit.Id, GitObjectType.Tree, false)
